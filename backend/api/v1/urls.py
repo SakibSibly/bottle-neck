@@ -5,7 +5,7 @@ from drf_spectacular.views import (
     SpectacularRedocView,
 )
 
-from . import views
+from api.v1.views import auth, blogs
 
 
 urlpatterns = [
@@ -19,13 +19,13 @@ urlpatterns = [
     path('redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 
     # JWT
-    path('token/', views.CustomTokenObtainPairView.as_view(), name='token-obtain-pair'),
-    path('token/refresh/', views.CustomTokenRefreshView.as_view(), name='token-refresh'),
+    path('token/', auth.CustomTokenObtainPairView.as_view(), name='token-obtain-pair'),
+    path('token/refresh/', auth.CustomTokenRefreshView.as_view(), name='token-refresh'),
 
     # Other API endpoints
-    path('register/', views.RegisterView.as_view(), name='register'),
-    # path('users/me/', views.)
+    path('register/', auth.RegisterView.as_view(), name='register'),
+    path('users/me/', auth.UserDetailView.as_view(), name='user-detail'),
 
-    path('blogs/', views.BlogList.as_view(), name='blog-list'),
-    path('blogs/<int:pk>/', views.BlogDetail.as_view(), name='blog-detail'),
+    path('blogs/', blogs.BlogList.as_view(), name='blog-list'),
+    path('blogs/<int:pk>/', blogs.BlogDetail.as_view(), name='blog-detail'),
 ]

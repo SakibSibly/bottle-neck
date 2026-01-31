@@ -1,46 +1,10 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from django.contrib.auth.models import User
 from drf_spectacular.utils import extend_schema
 
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-)
-
-from . import models
-from . import serializers
-
-
-class CustomTokenObtainPairView(TokenObtainPairView):
-    @extend_schema(
-        tags=["user management"]
-    )
-    def post(self, request, *args, **kwargs):
-        return super().post(request, *args, **kwargs)
-
-
-class CustomTokenRefreshView(TokenRefreshView):
-    @extend_schema(
-        tags=["user management"]
-    )
-    def post(self, request, *args, **kwargs):
-        return super().post(request, *args, **kwargs)
-
-
-class RegisterView(APIView):
-    @extend_schema(
-        request=serializers.UserSerializer,
-        responses={201: serializers.UserSerializer, 400: None},
-        tags=["user management"]
-    )
-    def post(self, request):
-        serializer = serializers.UserSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({'message': 'User registered successfully'}, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+from api.v1 import serializers
+from api.v1 import models
 
 
 class BlogList(APIView):
@@ -96,6 +60,13 @@ class BlogDetail(APIView):
         blog = self.get_object(pk)
         if blog is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
+
+        if not request.user.is_authenticated:
+            return Response({'detail': 'Authentication credentials were not provided.'}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        if blog.author != request.user:
+            return Response({'detail': 'You do not have permission to edit this blog.'}, status=status.HTTP_403_FORBIDDEN)
+        
         serializer = serializers.BlogSerializer(blog, data=request.data)
         if serializer.is_valid():
             serializer.save(author=request.user)
@@ -111,6 +82,13 @@ class BlogDetail(APIView):
         blog = self.get_object(pk)
         if blog is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
+
+        if not request.user.is_authenticated:
+            return Response({'detail': 'Authentication credentials were not provided.'}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        if blog.author != request.user:
+            return Response({'detail': 'You do not have permission to edit this blog.'}, status=status.HTTP_403_FORBIDDEN)
+        
         serializer = serializers.BlogSerializer(blog, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save(author=request.user)
@@ -125,5 +103,13 @@ class BlogDetail(APIView):
         blog = self.get_object(pk)
         if blog is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
+        
+        if not request.user.is_authenticated:
+            return Response({'detail': 'Authentication credentials were not provided.'}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        if blog.author != request.user:
+            return Response({'detail': 'You do not have permission to delete this blog.'}, status=status.HTTP_403_FORBIDDEN)
+        
         blog.delete()
+        
         return Response(status=status.HTTP_204_NO_CONTENT)

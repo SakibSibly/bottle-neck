@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 
-from . import models
+from api.v1 import models
 
 
 class UserSerializer(ModelSerializer):
@@ -23,4 +23,9 @@ class UserSerializer(ModelSerializer):
 class BlogSerializer(ModelSerializer):
     class Meta:
         model = models.Blog
-        fields = ['id', 'title', 'content']
+        fields = ['id', 'title', 'content', 'author', 'created_at', 'updated_at']
+        extra_kwargs = {
+            'author': {'read_only': True},
+            'created_at': {'read_only': True},
+            'updated_at': {'read_only': True},
+        }
