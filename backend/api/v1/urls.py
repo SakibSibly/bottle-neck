@@ -4,10 +4,7 @@ from drf_spectacular.views import (
     SpectacularSwaggerView,
     SpectacularRedocView,
 )
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-)
+
 from . import views
 
 
@@ -22,9 +19,13 @@ urlpatterns = [
     path('redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 
     # JWT
-    path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('token/', views.CustomTokenObtainPairView.as_view(), name='token-obtain-pair'),
+    path('token/refresh/', views.CustomTokenRefreshView.as_view(), name='token-refresh'),
 
     # Other API endpoints
-    
+    path('register/', views.RegisterView.as_view(), name='register'),
+    # path('users/me/', views.)
+
+    path('blogs/', views.BlogList.as_view(), name='blog-list'),
+    path('blogs/<int:pk>/', views.BlogDetail.as_view(), name='blog-detail'),
 ]
